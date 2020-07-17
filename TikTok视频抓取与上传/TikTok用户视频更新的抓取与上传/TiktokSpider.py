@@ -63,6 +63,9 @@ class TiktokSpider:
                 return None
 
             # 获取响应的信息体部分，是一个包含多个JSON对象的数组
+            if 'items' not in resp.json().keys():
+                continue
+
             items = resp.json()['items']
 
             if items is None:
@@ -71,14 +74,16 @@ class TiktokSpider:
             # 用户名
             uniqueId = items[0]['author']['uniqueId']
 
+            # 用户目录的路径
+            userDir = os.path.join(rootDir, "{0}".format(uniqueId))
+
             if not os.path.exists(os.path.join(rootDir, uniqueId)):
                 # 创建用户目录
                 uniqueIdDir = os.path.join(rootDir, uniqueId)
                 createFileCommand = 'mkdir ' + uniqueIdDir
                 os.system(createFileCommand)
 
-                # 用户目录的路径
-                userDir = os.path.join(rootDir, "{0}".format(uniqueId))
+
 
 
                 # 用户信息
@@ -111,7 +116,9 @@ class TiktokSpider:
                     mp4Res = os.popen(cmd).readlines()
 
                     if mp4Res != None:
+
                         print("mp4 video already exists!")
+
                     else:
                         # 视频持久化到本地
                         videoResp = requests.get(video_msg['playAddr']).content
