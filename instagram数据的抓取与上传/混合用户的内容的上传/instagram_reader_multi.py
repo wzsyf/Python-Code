@@ -2,15 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-import json
-import subprocess
 import re
-import requests
 import hashlib
 
 from api import *
-# from user_map import *
-from user_emails_multi import *
 from user_emails_multi import *
 from keep_flags import *
 
@@ -80,11 +75,11 @@ class InstagramReader:
 
 
             # 注册用户
-            # Voila.register(email, userNameOne, "demo")
             Voila.register(email, userNameTwo, "demo")
 
             # 以注册的用户进行登陆
             loginInfo = Voila.login(email, "demo")
+
             # 获取登录验证时的token令牌
             auth = loginInfo.get("token")
 
@@ -94,47 +89,50 @@ class InstagramReader:
             os.system(xzCommand)
 
 
+            # 提交用户名
+            Voila.PutAccount(auth, {"firstName": userNameTwo})
+
             # 判断父用户头像图片是否存在，若存在则进行上传
             if os.path.isfile(fatherUserImage):
                 Voila.PostAvatar(auth, fatherUserImage)
 
 
-            with open(jsonFile) as f:
-                # 读取json文件中的数据
-                data = f.read()
-                # 加载为JSON格式
-                data = json.loads(data)
+            # with open(jsonFile) as f:
+            #     # 读取json文件中的数据
+            #     data = f.read()
+            #     # 加载为JSON格式
+            #     data = json.loads(data)
 
                 # 获取JSON字段中对应的值
-                node = data.get("node")
+                # node = data.get("node")
                 # 用户图片url
-                profile_pic_url = node.get("profile_pic_url")
-                fullname = node.get("full_name")
-                fullnames = fullname.split(" ")
-
-                avatarImage = "{0}.jpg".format(userNameOne)
+                # profile_pic_url = node.get("profile_pic_url")
+                # fullname = node.get("full_name")
+                # fullnames = fullname.split(" ")
+                #
+                # avatarImage = "{0}.jpg".format(userNameOne)
 
                 # 请求图片信息
-                r = requests.get(profile_pic_url)
+                # r = requests.get(profile_pic_url)
                 # 以二进制写形式写到文件avatarImage中
-                with open(avatarImage, "wb") as f:
-                    f.write(r.content)
-                firstName = ""
-                lastName = ""
-                firstName = fullnames[0]
-                if len(fullnames) > 1:
-                    lastName = fullnames[1]
+                # with open(avatarImage, "wb") as f:
+                #     f.write(r.content)
+                # firstName = ""
+                # lastName = ""
+                # firstName = fullnames[0]
+                # if len(fullnames) > 1:
+                #     lastName = fullnames[1]
 
-                # 请求后台接口做更新操作
-                Voila.PutAccount(auth, {"firstName": firstName, "lastName": lastName})
+                # # 请求后台接口做更新操作
+                # Voila.PutAccount(auth, {"firstName": firstName, "lastName": lastName})
 
-                if os.path.exists(avatarImage):
-                    # 头像--将之前写入文件的图片二进制内容添加到数据库中
-                    Voila.PostAvatar(auth, avatarImage)
+                # if os.path.exists(avatarImage):
+                #     # 头像--将之前写入文件的图片二进制内容添加到数据库中
+                #     Voila.PostAvatar(auth, avatarImage)
 
                 # 添加好之后删除已经添加的存放图片二进制内容的文件
-                cmd = "rm {0}".format(avatarImage)
-                os.system(cmd)
+                # cmd = "rm {0}".format(avatarImage)
+                # os.system(cmd)
 
             # 压缩json文件
             xzCommand = "xz {0}".format(jsonFile)
