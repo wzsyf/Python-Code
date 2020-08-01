@@ -1,0 +1,51 @@
+需求：每天统计一下新发帖和新注册的用户（忽略掉我们自己生成的用户），然后自动发邮件给运营人员
+
+
+
+1）新发帖子的统计：（userid, username, 新帖子数， 帖子总数）
+
+ 
+sylius_customer,  mukhin_sylius_blogging_blog, mukhin_sylius_blogging_post
+用户表 博客表和帖子表
+
+select 
+d.userId,d.userName,d.newPostNum,e.totalPostNum
+from
+((select 
+blog_id userId,count(blog_id) totalPostNum
+from
+mukhin_sylius_blogging_post
+group by
+blog_id) e
+inner join
+(select 
+c.blog_id userId,c.first_name userName,count(c.blog_id) newPostNum
+from
+(select 
+blog_id,b.first_name,created_at
+from 
+mukhin_sylius_blogging_post
+inner join 
+(select mukhin_sylius_blogging_blog.id,a.first_name from mukhin_sylius_blogging_blog inner join (select id,first_name from sylius_customer where LOCATE('@a.com',email)=0) a on mukhin_sylius_blogging_blog.customer_id = a.id) b
+on
+mukhin_sylius_blogging_post.blog_id = b.id) c
+where
+DATE_FORMAT(created_at,'%Y-%m-%d') = DATE_FORMAT(date_sub(curdate(),interval 1 day),'%Y-%m-%d')
+group by
+c.blog_id) d
+on
+d.userId = e.userId);
+
+
+
+
+2）新注册用户统计
+
+ select 
+ id userId,first_name userName,email,created_at createTime
+ from 
+ sylius_customer 
+ where 
+ LOCATE('@a.com',email)=0 
+ and 
+ DATE_FORMAT(created_at,'%Y-%m-%d') = DATE_FORMAT(date_sub(curdate(),interval 1 day),'%Y-%m-%d');
