@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import csv
 
+# Name在多个公共子串分类下,即有重复版本,公共子串乱序版本
 class GetMaxCommonSubStr:
     def getMaxCommonSubstr(self, s1, s2):
         # 求两个字符串的最长公共子串
@@ -45,7 +46,7 @@ class GetMaxCommonSubStr:
         return column
 
 
-
+    # {subStr:{Name:Brand}}
     def calMaxSubStr(self):
 
         filePath = 'D:/brands.csv'
@@ -65,6 +66,7 @@ class GetMaxCommonSubStr:
 
                 if subStrLen >= 6:
                     subStrValue = allCommonSubstr.get(subStr)
+                    # {Name: Brand}
                     if subStrValue is None:
                         commonSubStr = {}
                         commonSubStr[columnKeys[i]] = column.get(columnKeys[i])

@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import csv
 
-# Name在多个公共子串分类下,即有重复版本,公共子串长度倒序排序
+
+# 无重复版本 - Name只分配到最公共子串最长的分类下,公共子串是按倒序排列
 class GetMaxCommonSubStr:
     def getMaxCommonSubstr(self, s1, s2):
         # 求两个字符串的最长公共子串
@@ -46,7 +47,7 @@ class GetMaxCommonSubStr:
         return column
 
 
-    # {subStr:{Name:Brand}}
+
     def calMaxSubStr(self):
 
         filePath = 'D:/brands.csv'
@@ -57,6 +58,7 @@ class GetMaxCommonSubStr:
         columnKeys = column.keys()
         columnLen = len(columnKeys)
 
+        # {Name:{subStr:subStrLen}}
         allCommonSubstr = {}
 
         for i in range(0, columnLen - 1):
@@ -65,20 +67,60 @@ class GetMaxCommonSubStr:
                 subStrLen, subStr = self.getMaxCommonSubstr(columnKeys[i], columnKeys[j])
 
                 if subStrLen >= 6:
-                    subStrValue = allCommonSubstr.get(subStr)
-                    # {Name: Brand}
-                    if subStrValue is None:
+
+                    subStrValue2I = allCommonSubstr.get(columnKeys[i])
+                    subStrValue2J = allCommonSubstr.get(columnKeys[j])
+
+                    # {subStr:subStrLen}
+                    if subStrValue2I is None:
                         commonSubStr = {}
-                        commonSubStr[columnKeys[i]] = column.get(columnKeys[i])
-                        commonSubStr[columnKeys[j]] = column.get(columnKeys[j])
+                        commonSubStr[subStr] = subStrLen
 
-                        allCommonSubstr[subStr] = commonSubStr
+                        allCommonSubstr[columnKeys[i]] = commonSubStr
                     else:
-                        subStrValue[columnKeys[j]] = column.get(columnKeys[j])
-                        allCommonSubstr[subStr] = subStrValue
+                        subStrValue2I[subStr] = subStrLen
+                        allCommonSubstr[columnKeys[i]] = subStrValue2I
+
+                    # {subStr:subStrLen}
+                    if subStrValue2J is None:
+                        commonSubStr = {}
+                        commonSubStr[subStr] = subStrLen
+
+                        allCommonSubstr[columnKeys[j]] = commonSubStr
+                    else:
+                        subStrValue2J[subStr] = subStrLen
+                        allCommonSubstr[columnKeys[j]] = subStrValue2J
+
+        # {subStr:{Name:Brand}}
+        similarSubStr2NameAndBrand = self.calSimilarSubStr(allCommonSubstr, column)
+
+        return similarSubStr2NameAndBrand
 
 
-        return allCommonSubstr
+    # {subStr:{Name:Brand}}
+    def calSimilarSubStr(self, dic, column):
+
+        allCommonSubStr = {}
+
+        for key, value in dic.items():
+
+            # 去重,对每个Name下的{subStr:subStrLen}进行倒序排序，并取出第一个元素
+            dics = sorted(value.items(), key=lambda item: item[1], reverse=True)
+            similarSubStr = dics[0][0]
+            subStr2NameAndBrand = allCommonSubStr.get(similarSubStr)
+
+            # {Name: Brand}
+            if subStr2NameAndBrand is None:
+                commonStr2NameAndBrand = {}
+                commonStr2NameAndBrand[key] = column.get(key)
+
+                allCommonSubStr[similarSubStr] = commonStr2NameAndBrand
+            else:
+                subStr2NameAndBrand[key] = column.get(key)
+                allCommonSubStr[similarSubStr] =subStr2NameAndBrand
+
+
+        return allCommonSubStr
 
 
 
@@ -122,6 +164,6 @@ if __name__ == "__main__":
     column = gmcss.calMaxSubStr()
     # haveNotRepeat = gmcss.removeRepeat(column)
 
-    downpath = 'D:\substr/result.csv'
+    downpath = 'D:\maxCommonSubStr/result.csv'
     gmcss.persist2File(downpath, column)
 
